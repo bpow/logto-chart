@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "logto-chart.fullname" . }}
   labels:
+    app.kubernetes.io/component: core
     {{- include "logto-chart.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
@@ -10,6 +11,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
+      app.kubernetes.io/component: core
       {{- include "logto-chart.selectorLabels" . | nindent 6 }}
   template:
     metadata:
@@ -18,6 +20,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
+        app.kubernetes.io/component: core
         {{- include "logto-chart.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -29,13 +32,25 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
+          command:
+            - /bin/sh
+            - -c
+            - 'npm start'
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "logto-chart.fullname" . }}
+            - secretRef:
+                name: {{ include "logto-chart.fullname" . }}-db
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
+              protocol: TCP
+            - name: admin
+              containerPort: {{ .Values.service.adminPort }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -45,8 +60,17 @@ spec:
             httpGet:
               path: /
               port: http
+          volumeMounts:
+            - name: connectors
+              mountPath: /etc/logto/packages/core/connectors
+              readOnly: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: connectors
+          persistentVolumeClaim:
+            claimName: {{ include "logto-chart.fullname" . }}-connectors
+            readOnly: true
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

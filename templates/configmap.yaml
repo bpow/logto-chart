@@ -1,0 +1,9 @@
+{{- $fullName := include "logto-chart.fullname" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $fullName }}
+data:
+  PORT: {{ .Values.service.port | quote }}
+  ADMIN_PORT: {{ .Values.service.adminPort | quote }}
+  {{- toYaml .Values.environmentData | nindent 2 }}

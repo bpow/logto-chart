@@ -20,3 +20,10 @@
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
 {{- end }}
+
+2. Two initialization tasks are run as Jobs at deployment:
+   * Population of `connectors` directory, to be shared as `ReadOnlyMany` by deployed pods
+   * Database alterations ("migrations")
+
+   These are also provided as suspended CronJobs, which can be used as templates for manual
+   updates of each of these in the future.

@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "logto-chart.fullname" . }}-init
+  labels:
+    {{- include "logto-chart.labels" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+        - name: connectors
+          persistentVolumeClaim:
+            claimName: {{ include "logto-chart.fullname" . }}-connectors
+      containers:
+      - name: {{ include "logto-chart.fullname" . }}-connectors
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        envFrom:
+          - secretRef:
+              name: {{ include "logto-chart.fullname" . }}-db
+        env:
+          - name: CI
+            value: "true"
+          - name: DB_URL
+            value: "postgresql://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@{{ include "logto-chart.fullname" . }}-db:5432/$(POSTGRES_DB)"
+        command:
+          - /bin/sh
+          - -c
+          - |
+            npm run cli db seed -- --swe
+            npm run cli connector add -- --official
+        volumeMounts:
+          - name: connectors
+            mountPath: /etc/logto/packages/core/connectors

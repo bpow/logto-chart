@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "logto-chart.fullname" . }}-connectors
+  labels:
+    {{- include "logto-chart.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.connectors.schedule }}"
+  suspend: {{ .Values.connectors.suspend }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+            - name: connectors
+              persistentVolumeClaim:
+                claimName: {{ include "logto-chart.fullname" . }}-connectors
+          containers:
+          - name: {{ include "logto-chart.fullname" . }}-connectors
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command:
+              - /bin/sh
+              - -c
+              - 'npm run cli connector add -- --official'
+            volumeMounts:
+              - name: connectors
+                mountPath: /etc/logto/packages/core/connectors

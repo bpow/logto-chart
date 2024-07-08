@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "logto-chart.fullname" . }}-alteration
+  labels:
+    {{- include "logto-chart.labels" . | nindent 4 }}
+spec:
+  schedule: "{{ .Values.alteration.schedule }}"
+  suspend: {{ .Values.alteration.suspend }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: {{ include "logto-chart.fullname" . }}-alteration
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            command:
+              - /bin/sh
+              - -c
+              - 'npm run alteration deploy'
+            envFrom:
+              - secretRef:
+                  name: {{ include "logto-chart.fullname" . }}-db
+            env:
+              - name: CI
+                value: "true"
