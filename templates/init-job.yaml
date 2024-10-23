@@ -28,8 +28,8 @@ spec:
           - /bin/sh
           - -c
           - |
-            npm run cli db seed -- --swe
-            npm run cli connector add -- --official
+            npm run cli db seed -- --swe || exit -1
+            npm run cli connector add -- --official || exit -2
         volumeMounts:
           - name: connectors
             mountPath: /etc/logto/packages/core/connectors

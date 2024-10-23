@@ -51,7 +51,7 @@ spec:
             command:
             - pg_isready
             - -U
-            - $PGUSER
+            - $POSTGRES_USER
             - -h
             - localhost
         volumeMounts:

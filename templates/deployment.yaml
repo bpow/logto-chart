@@ -61,12 +61,18 @@ spec:
               path: /
               port: http
           volumeMounts:
+            - name: dotnpm
+              mountPath: /.npm
+              readOnly: false
             - name: connectors
               mountPath: /etc/logto/packages/core/connectors
               readOnly: true
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+        - name: dotnpm
+          emptyDir:
+            sizeLimit: 500Mi
         - name: connectors
           persistentVolumeClaim:
             claimName: {{ include "logto-chart.fullname" . }}-connectors
