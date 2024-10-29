@@ -8,7 +8,7 @@ image:
   repository: ghcr.io/logto-io/logto
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.20.0"
+  # tag: "edge"
 
 imagePullSecrets: []
 nameOverride: ""
