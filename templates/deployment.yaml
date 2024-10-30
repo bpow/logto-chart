@@ -66,17 +66,18 @@ spec:
               readOnly: false
             - name: connectors
               mountPath: /etc/logto/packages/core/connectors
-              readOnly: true
+              readOnly: false
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: dotnpm
-          emptyDir:
-            sizeLimit: 500Mi
+          persistentVolumeClaim:
+            claimName: {{ include "logto-chart.fullname" . }}-dotnpm
+            readOnly: false
         - name: connectors
           persistentVolumeClaim:
             claimName: {{ include "logto-chart.fullname" . }}-connectors
-            readOnly: true
+            readOnly: false
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

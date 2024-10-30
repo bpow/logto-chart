@@ -12,6 +12,9 @@ spec:
         - name: connectors
           persistentVolumeClaim:
             claimName: {{ include "logto-chart.fullname" . }}-connectors
+        - name: dotnpm
+          persistentVolumeClaim:
+            claimName: {{ include "logto-chart.fullname" . }}-dotnpm
       containers:
       - name: {{ include "logto-chart.fullname" . }}-connectors
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -33,5 +36,11 @@ spec:
         volumeMounts:
           - name: connectors
             mountPath: /etc/logto/packages/core/connectors
+            readOnly: false
+          - name: dotnpm
+            mountPath: /.npm
+            readOnly: false
         resources:
           {{- toYaml .Values.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}

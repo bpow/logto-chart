@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "logto-chart.fullname" . }}-dotnpm
+  labels:
+    {{- include "logto-chart.labels" . | nindent 4 }}
+spec:
+    accessModes:
+      - ReadWriteMany
+    resources:
+      requests:
+        storage: {{ .Values.dotnpm.storage }}

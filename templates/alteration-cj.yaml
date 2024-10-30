@@ -27,3 +27,5 @@ spec:
             env:
               - name: CI
                 value: "true"
+            securityContext:
+              {{- toYaml .Values.securityContext | nindent 12 }}

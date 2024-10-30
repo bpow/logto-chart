@@ -96,6 +96,9 @@ connectors:
   suspend: true # by default, just run once and do not schedule additional runs
   storage: 128Mi
 
+dotnpm:
+  storage: 512Mi
+
 db:
   password: "changeme-please"
   user: postgres
